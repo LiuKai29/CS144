@@ -1,6 +1,11 @@
 #pragma once
 
 #include "byte_stream.hh"
+#include <cstdint>
+#include <map>
+#include <optional>
+#include <string>
+#include <utility>
 
 class Reassembler
 {
@@ -13,7 +18,6 @@ public:
    *   `first_index`: the index of the first byte of the substring
    *   `data`: the substring itself
    *   `is_last_substring`: this substring represents the end of the stream
-   *   `output`: a mutable reference to the Writer
    *
    * The Reassembler's job is to reassemble the indexed substrings (possibly out-of-order
    * and possibly overlapping) back into the original ByteStream. As soon as the Reassembler
@@ -42,4 +46,11 @@ public:
 
 private:
   ByteStream output_; // the Reassembler writes to this ByteStream
+
+  // Nonempty fragments, with overlapping and adjacent fragments merged.
+  std::map<uint64_t, std::string> pending_ {};
+  std::optional<uint64_t> end_index_ {}; // One past the last byte, if known.
+
+  void insert_pending( uint64_t first_index, std::string data );
+  void flush_pending();
 };
