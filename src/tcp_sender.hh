@@ -48,4 +48,27 @@ private:
   ByteStream input_;
   Wrap32 isn_;
   uint64_t initial_RTO_ms_;
+  uint64_t current_RTO_ms_ { initial_RTO_ms_ };
+
+  bool timer_running_ {};
+  uint64_t timer_elapsed_ms_ {};
+  uint64_t consecutive_retransmissions_ {};
+
+  // 均记录的绝对序号
+  uint64_t next_seqno_ {};
+  uint64_t acked_seqno_ {};
+
+  // fin 是否已经发送
+  bool fin_sent_ {};
+
+  // 默认初始 window_size 为 1
+  TCPReceiverMessage msg_receive_ { .window_size = 1 };
+
+  // 记录等待 ACK 的 messages
+  struct OutstandingMessage
+  {
+    TCPSenderMessage message;
+    uint64_t end_seqno;
+  };
+  std::queue<OutstandingMessage> outstanding_messages_ {};
 };
