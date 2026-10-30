@@ -1,9 +1,13 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <queue>
+#include <unordered_map>
 
 #include "address.hh"
 #include "ethernet_frame.hh"
+#include "ethernet_header.hh"
 #include "ipv4_datagram.hh"
 
 // A "network interface" that connects IP (the internet layer, or network layer)
@@ -81,4 +85,17 @@ private:
 
   // Datagrams that have been received
   std::queue<InternetDatagram> datagrams_received_ {};
+
+  struct ARPEntry
+  {
+    EthernetAddress mac {};
+    size_t cache_ms = 0; // 以缓存时间
+  };
+  std::unordered_map<uint32_t, ARPEntry> arp_cache_ {}; // 维护已知的网址
+
+  // 等待发送的 IP 与 data_gram
+  std::unordered_map<uint32_t, std::queue<InternetDatagram>> wait_transmit_ {};
+
+  // 记录时间
+  std::unordered_map<uint32_t, size_t> arp_request_age_ {};
 };
